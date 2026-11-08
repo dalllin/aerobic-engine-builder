@@ -1,36 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aerobic Engine Builder</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aerobic Architect</title>
 
-    <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
 <div class="container">
 
-    <h1>Aerobic Engine Builder</h1>
+    <h1>Aerobic Architect</h1>
+    <p>Create a 2-week aerobic-focused training plan.</p>
 
     <div class="card">
 
         <label>Fitness Level</label>
-
-        <select id="fitness">
+        <select id="fitnessLevel">
             <option>Beginner</option>
             <option>Intermediate</option>
             <option>Advanced</option>
         </select>
 
-        <label>Days Available Per Week</label>
-
-        <select id="days">
+        <label>Days Per Week</label>
+        <select id="daysPerWeek">
             <option>3</option>
             <option>4</option>
             <option selected>5</option>
             <option>6</option>
-            <option>7</option>
+        </select>
+
+        <label>Equipment</label>
+        <select id="equipment">
+            <option>Bodyweight</option>
+            <option>Dumbbells</option>
+            <option>Full Gym</option>
         </select>
 
         <button onclick="generatePlan()">
@@ -39,7 +44,7 @@
 
     </div>
 
-    <div id="results"></div>
+    <div id="plan"></div>
 
 </div>
 

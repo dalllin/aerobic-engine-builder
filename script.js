@@ -3,6 +3,8 @@ const PDFJS_URL = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/buil
 const PDFJS_WORKER_URL = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/build/pdf.worker.mjs`;
 const MAX_PDF_BYTES = 10 * 1024 * 1024;
 const MAX_PDF_PAGES = 30;
+const MAX_PDF_TEXT_CHARS = 200000;
+const MAX_PDF_PARSE_MS = 20000;
 
 const form = document.getElementById("planner-form");
 const output = document.getElementById("plan-output");
@@ -189,25 +191,70 @@ const jointGuides = {
 
 const defaultSupportGuides = {
     "standing calf raise": {
-        description: "Rise onto the balls of your feet, pause briefly, then lower with control.",
+        description: "Stand with feet hip-width apart and fingertips near a wall or rail. Rise straight up onto the balls of both feet, pause, then lower your heels slowly.",
         focus: "Calves and ankle control.",
         cue: "Use a wall or rail for balance and avoid rolling the ankles outward."
     },
     "single-leg balance near support": {
-        description: "Stand near a stable support and hold a comfortable single-leg position.",
+        description: "Stand beside a stable counter or rail. Shift weight onto one foot and lift the other slightly; hold steady for the planned time, then switch sides.",
         focus: "Foot, ankle, hip stabilizers, and balance.",
         cue: "Keep the standing foot grounded and use the support before balance becomes unstable."
     },
     "90/90 hip switches": {
-        description: "Sit with both knees bent and gently rotate them from side to side.",
+        description: "Sit on the floor with knees bent and feet wider than hips. Let both knees fall gently to one side, return through center, and move them to the other side.",
         focus: "Hip rotation and comfortable mobility.",
         cue: "Move slowly within a relaxed range; do not press the knees down."
     },
     "wall slides": {
-        description: "Slide your arms up a wall and back down while keeping the movement comfortable.",
+        description: "Stand facing a wall with forearms resting against it. Gently slide your arms upward as far as comfortable, then lower them slowly while keeping light contact.",
         focus: "Shoulder-blade control and shoulder mobility.",
         cue: "Keep ribs relaxed and stop before the shoulders shrug or pinch."
     }
+};
+
+// Exercise-specific instructions: setup and movement are described separately from
+// the muscle focus and form cue so users can understand unfamiliar variations.
+const exerciseGuides = {
+    "chair squat": { description: "Stand in front of a sturdy chair with feet about hip-to-shoulder width apart. Send your hips back, bend your knees to lightly touch the chair, then stand.", focus: "Quadriceps and glutes, with controlled knee and hip alignment.", cue: "Keep your whole foot grounded and let your knees track in the same direction as your toes." },
+    "box squat": { description: "Stand just in front of a stable box or bench. Push your hips back to sit lightly, keep your trunk steady, then press through your feet to stand.", focus: "Quadriceps and glutes, with controlled knee and hip alignment.", cue: "Touch the box softly; do not drop onto it or rock forward to stand." },
+    "banded squat": { description: "Stand on the middle of a resistance band and hold its ends at your shoulders. Sit your hips down and back, then stand while keeping the band secure.", focus: "Quadriceps and glutes, with controlled knee and hip alignment.", cue: "Use a band light enough to keep the movement smooth; keep knees in line with toes." },
+    "goblet squat": { description: "Hold one dumbbell close to your chest with both hands. Sit your hips down between your feet, then push through the floor to stand.", focus: "Quadriceps and glutes, with trunk bracing.", cue: "Keep the weight close and your heels grounded; use a depth you can control." },
+    "leg press": { description: "Sit with your back supported and feet on the platform. Unlock the sled, lower it until your knees bend comfortably, then press the platform away without locking your knees.", focus: "Quadriceps and glutes.", cue: "Keep hips and back against the pad; use a controlled range and follow the machine instructions." },
+    "glute bridge": { description: "Lie on your back with knees bent and feet flat. Brace gently, press through your feet, and lift your hips until your body forms a comfortable line from shoulders to knees; lower slowly.", focus: "Glutes and hamstrings.", cue: "Finish by squeezing your glutes, not by arching your lower back." },
+    "hip hinge": { description: "Stand tall with soft knees. Push your hips backward while your trunk tips forward as one steady unit, then drive your hips forward to stand.", focus: "Glutes and hamstrings.", cue: "Keep your back long and stop when you feel a gentle hamstring stretch." },
+    "band pull-through": { description: "Anchor a band low behind you and hold it between your legs. Step forward to create light tension, hinge your hips back, then squeeze your glutes to stand.", focus: "Glutes and hamstrings.", cue: "Keep arms relaxed; the hips move the band, and the spine stays steady." },
+    "dumbbell Romanian deadlift": { description: "Hold dumbbells in front of your thighs. With knees softly bent, push hips back and lower the weights close to your legs; stand by bringing hips forward.", focus: "Glutes and hamstrings.", cue: "Keep weights close and stop the descent before your back rounds." },
+    "hamstring curl": { description: "Set up on the curl machine with its pad just above your heels. Bend your knees to bring the pad toward you, pause, then return slowly.", focus: "Hamstrings at the back of the thighs.", cue: "Align your knees with the machine pivot and avoid lifting your hips off the pad." },
+    "supported split squat": { description: "Stand in a staggered stance beside a wall or rail. Hold support lightly, bend both knees to lower straight down, then press through the front foot to rise.", focus: "Quadriceps, glutes, and single-leg balance.", cue: "Keep the front foot planted and use support to make balance easy." },
+    "low step-up": { description: "Face a low, stable step. Place one whole foot on it, lean slightly forward, and step up; lower slowly with control and repeat on that side.", focus: "Quadriceps, glutes, and single-leg balance.", cue: "Choose a step height that lets you rise without pushing off strongly with the trailing foot." },
+    "band-resisted step-up": { description: "Secure a light band around your thighs or to a safe anchor as instructed. Step onto a low platform, stand tall, then step down slowly.", focus: "Quadriceps, glutes, and hip control.", cue: "Keep the knee tracking over the foot; stop if the band shifts or the anchor is unstable." },
+    "supported reverse lunge": { description: "Hold a stable support and stand tall. Step one foot backward, bend both knees only as far as comfortable, then push through the front foot to return.", focus: "Quadriceps, glutes, and single-leg balance.", cue: "Keep most pressure through the front foot and avoid wobbling or forcing depth." },
+    "single-leg press": { description: "Use the leg-press machine with one foot centered on the platform. Lower the sled a short, comfortable distance, then press back up without locking the knee.", focus: "Quadriceps and glutes on one side at a time.", cue: "Keep your pelvis level and use a light load; follow the machine setup instructions." },
+    "wall or incline push-up": { description: "Place hands on a wall or sturdy raised surface, slightly wider than shoulders. Keep your body in a straight line, bend elbows to bring your chest toward your hands, then press away.", focus: "Chest, shoulders, and triceps.", cue: "Keep wrists comfortable and elbows angled slightly back rather than straight out." },
+    "band chest press": { description: "Anchor a band behind you at chest height and hold an end in each hand. Start with hands near your chest, press forward, then return slowly.", focus: "Chest, shoulders, and triceps.", cue: "Stand in a stable stance and keep shoulders relaxed; make sure the anchor is secure." },
+    "dumbbell floor press": { description: "Lie on your back with knees bent and a dumbbell in each hand. Start with elbows resting lightly on the floor, press weights over your chest, then lower until elbows touch down softly.", focus: "Chest, shoulders, and triceps.", cue: "Keep wrists stacked over elbows and use a load you can lower quietly." },
+    "chest press": { description: "Adjust the machine so handles begin around mid-chest. Press forward until arms are nearly straight, then return slowly without letting the weight stack slam.", focus: "Chest, shoulders, and triceps.", cue: "Keep your back supported and wrists straight; follow the machine instructions." },
+    "prone W raise": { description: "Lie face down with forehead supported and elbows bent to make a W shape. Gently lift hands and elbows a little, squeeze shoulder blades down and back, then lower.", focus: "Upper back and shoulder-blade control.", cue: "Use a tiny lift; keep your neck relaxed and do not arch your lower back." },
+    "band row": { description: "Anchor a band in front of you at about chest height. Hold it with arms extended, draw elbows back toward your ribs, then straighten arms slowly.", focus: "Upper back, lats, and biceps.", cue: "Keep shoulders away from ears and avoid leaning backward to finish." },
+    "one-arm dumbbell row": { description: "Support one hand on a bench or sturdy surface, hinge forward, and hold a dumbbell in the other hand. Pull it toward your hip, then lower until the arm is straight.", focus: "Upper back, lats, and biceps.", cue: "Keep your trunk still and avoid twisting to lift the weight." },
+    "seated row": { description: "Sit tall at the row machine with feet supported. Pull the handle toward your lower ribs by drawing elbows back, then extend arms slowly.", focus: "Upper back, lats, and biceps.", cue: "Keep chest relaxed and torso steady; follow the machine instructions." },
+    "dead bug": { description: "Lie on your back with arms up and hips and knees bent. Gently brace your trunk; slowly lower one arm and the opposite leg, return, then switch sides.", focus: "Abdominal muscles that resist lower-back arching.", cue: "Only lower as far as you can while keeping your back comfortably steady and breathing." },
+    "bird dog": { description: "Start on hands and knees. Reach one arm forward and the opposite leg backward, pause without rotating your hips, return, then switch sides.", focus: "Trunk, glutes, and shoulder stabilizers.", cue: "Reach long rather than high; keep your back level and move slowly." },
+    "Pallof press": { description: "Stand sideways to a band anchored at chest height and hold it at your chest with both hands. Press hands forward, resist the band pulling you around, then bring hands back.", focus: "Abdominal and trunk muscles resisting rotation.", cue: "Keep hips and shoulders facing forward; step closer to the anchor to make it easier." },
+    "suitcase carry": { description: "Hold one weight at your side and walk slowly for the planned time or distance. Turn carefully, switch hands, and walk back.", focus: "Grip, trunk, and side-of-hip stabilizers.", cue: "Walk tall without leaning toward or away from the weight; use a clear path." },
+    "low step-down": { description: "Stand on a low step with one foot near its edge. Slowly bend the standing knee to tap the other heel to the floor, then straighten back up.", focus: "Quadriceps and hip muscles controlling the knee.", cue: "Keep the standing knee tracking over the foot and use a rail for balance." },
+    "band terminal knee extension": { description: "Loop a band behind one knee and stand facing its anchor. Start with the knee slightly bent, then gently straighten it against the band and return.", focus: "Quadriceps that straighten and control the knee.", cue: "Keep the movement small and smooth; do not snap or force the knee backward." },
+    "light leg extension": { description: "Sit at the leg-extension machine with the pad above your ankles. Straighten your knees smoothly, pause briefly, and lower the weight slowly.", focus: "Quadriceps at the front of the thighs.", cue: "Use a light load and comfortable range; follow the machine instructions." },
+    "tibialis raise against a wall": { description: "Lean your back against a wall with heels on the floor and feet slightly forward. Lift your toes toward your shins, then lower them slowly.", focus: "Tibialis anterior and other muscles along the front of the shin.", cue: "Keep heels planted and use a small range that stays controlled." },
+    "side-lying clamshell": { description: "Lie on your side with knees bent and feet together. Keeping your hips stacked, lift the top knee without rolling your pelvis, then lower slowly.", focus: "Gluteal muscles at the side of the hip.", cue: "Keep feet touching and make the motion small; avoid rolling backward." },
+    "lateral band walk": { description: "Place a light loop band above your knees or around your ankles. Bend slightly at hips and knees, step sideways, then follow with the other foot while keeping band tension.", focus: "Side glutes and hip stabilizers.", cue: "Keep toes mostly forward and avoid letting the knees collapse inward." },
+    "standing hip abduction": { description: "At the hip-abduction machine, position the pads as directed. Press your knees outward against light resistance, pause, then return slowly.", focus: "Gluteal muscles on the outside of the hips.", cue: "Keep your back supported and do not bounce; follow the machine instructions." },
+    "band external rotation": { description: "Stand or sit with a light band held between your hands, elbows bent and tucked at your sides. Rotate hands outward, then return slowly.", focus: "Rotator cuff muscles that help control the shoulder.", cue: "Keep elbows against your sides and use very light tension without shrugging." },
+    "band pull-apart": { description: "Hold a light band at shoulder height with arms extended. Pull hands apart by squeezing shoulder blades gently, then return slowly.", focus: "Rear shoulders and upper-back muscles.", cue: "Keep ribs relaxed and shoulders down; stop before arms move behind your body." },
+    "light cable face pull": { description: "Set a cable rope near face height. Pull it toward your forehead with elbows out and hands separating, then extend arms slowly.", focus: "Rear shoulders, upper back, and shoulder-blade control.", cue: "Use light weight, keep neck relaxed, and follow the machine instructions." },
+    "light wrist extension": { description: "Rest your forearm on a table or thigh with palm facing down and hand over the edge. Lift the hand gently at the wrist, then lower slowly.", focus: "Wrist extensor muscles on the back of the forearm.", cue: "Use a very light weight and keep the forearm supported and still." },
+    "gentle forearm rotation": { description: "Sit with your elbow bent and tucked close to your side. Slowly turn your palm up, then down, through a comfortable range.", focus: "Forearm muscles that rotate the wrist and hand.", cue: "Keep the elbow still and do not force the end of either direction." },
+    "light band wrist extension": { description: "Anchor a light band below your hand and sit with the forearm supported, palm down. Lift the back of your hand against the band, then return slowly.", focus: "Wrist extensor muscles on the back of the forearm.", cue: "Keep the forearm still and tension light; use a comfortable range." }
 };
 
 const jointSupportLibrary = {
@@ -644,7 +691,7 @@ function escapeHTML(value) {
 }
 
 function renderExerciseItem(exercise) {
-    const guide = exercise.guide || {
+    const guide = exerciseGuides[exercise.name] || exercise.guide || {
         description: "Use a controlled, comfortable range of motion.",
         focus: "The muscles involved in this movement pattern.",
         cue: "Move smoothly and stop if the movement causes sharp or increasing pain."
@@ -910,30 +957,40 @@ async function readPreviousPdf(file) {
     setPdfStatus("Reading PDF text locally…");
 
     let documentTask = null;
+    let timeoutId = null;
     try {
         const pdfjs = await import(PDFJS_URL);
         pdfjs.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_URL;
         const data = new Uint8Array(await file.arrayBuffer());
         documentTask = pdfjs.getDocument({ data });
+        timeoutId = setTimeout(() => {
+            documentTask?.destroy().catch(() => {});
+        }, MAX_PDF_PARSE_MS);
         const pdf = await documentTask.promise;
 
         if (pdf.numPages > MAX_PDF_PAGES) {
             const pageCount = pdf.numPages;
+            clearTimeout(timeoutId);
             await documentTask.destroy();
             setPdfStatus(`This file has ${pageCount} pages. For privacy and speed, choose a PDF with ${MAX_PDF_PAGES} pages or fewer.`, "error");
             return;
         }
 
         const pages = [];
+        let extractedCharacters = 0;
         for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
             const page = await pdf.getPage(pageNumber);
             const content = await page.getTextContent();
-            pages.push(content.items.map((item) => item.str).join(" "));
-            if (pages.join(" ").length > 200000) break;
+            const pageText = content.items.map((item) => item.str).join(" ");
+            const remaining = MAX_PDF_TEXT_CHARS - extractedCharacters;
+            pages.push(pageText.slice(0, remaining));
+            extractedCharacters += Math.min(pageText.length, remaining);
+            if (extractedCharacters >= MAX_PDF_TEXT_CHARS) break;
         }
+        clearTimeout(timeoutId);
         await documentTask.destroy();
 
-        const text = pages.join(" ").replace(/\s+/g, " ").slice(0, 200000);
+        const text = pages.join(" ").replace(/\s+/g, " ").slice(0, MAX_PDF_TEXT_CHARS);
         if (!text.trim()) {
             setPdfStatus("No selectable text was found. Scanned or image-only PDFs cannot be read; you can still use your preferences and prior-plan feedback.", "error");
             return;
@@ -950,6 +1007,7 @@ async function readPreviousPdf(file) {
             setPdfStatus(`${detected}Detected activities are checked below as starting preferences. This PDF does not confirm what you completed or how it felt.`, "success");
         }
     } catch (error) {
+        clearTimeout(timeoutId);
         if (documentTask) {
             try {
                 await documentTask.destroy();

@@ -19,7 +19,7 @@ The main planner uses a deferred regular script, so plan generation also works w
 - **Experience:** adjusts sets, repetition ranges, effort targets, and the harder aerobic session. New or returning users get controlled intervals; the plan does not prescribe all-out sprinting.
 - **Preferences:** chosen cardio modes and strength equipment are used when selecting activities and exercise variations.
 - **Joint-support areas:** adds a small amount of nearby muscle, balance, or stability work. These selections are not an injury diagnosis or rehabilitation prescription.
-- **Exercise details:** strength movements appear on separate lines. Hover or keyboard-focus a movement's information control for its description, key muscle focus, and a form cue.
+- **Exercise details:** strength movements appear on separate lines. Hover or keyboard-focus a movement's information control for a movement-specific setup and action description, key muscle focus, and a form cue.
 - **Weekend choice:** one long easy session is scheduled. The other weekend day shows an optional move-it alternative, so a user can choose Saturday or Sunday instead of adding a second long run.
 - **Previous plan:** this planner's own printed PDF includes a text record that can carry over its weekly aerobic minutes and preferences. Other text PDFs are only scanned for activity terms. A PDF cannot tell whether its sessions were actually completed, so the person also selects how the prior plan felt.
 - **Progression:** if a prior planner PDF is recognized, the feedback choice holds, slightly increases, or reduces its volume estimate. Without a recognized record, the planner uses the selected experience level and does not assume a previous workload.
@@ -28,7 +28,9 @@ The main planner uses a deferred regular script, so plan generation also works w
 
 “Save as PDF” opens the browser print dialog. Choose **Save as PDF** as the destination. The print stylesheet lays out each week as one seven-day row on landscape pages.
 
-PDF import uses Mozilla PDF.js `6.5.438`, loaded from jsDelivr only when a PDF is selected. PDF text is read in the browser. The site has no upload endpoint, does not save the file, and does not store the extracted text. Import is limited to 10 MB and 30 pages; scanned/image-only or encrypted files may not provide readable text. PDF import needs an internet connection and an `https://` or local HTTP page; browsers may block the module library from a `file://` page. Plan generation and print export do not depend on PDF import.
+PDF import uses Mozilla PDF.js `6.5.438`, loaded from a version-pinned jsDelivr path only when a PDF is selected. The Content Security Policy restricts this external code to that version's build directory. The library runs in the browser and can access the page; PDF text is not intentionally sent to a server. The site has no upload endpoint, does not save the file, and does not store the extracted text. Import is limited to 10 MB, 30 pages, 200,000 extracted text characters, and a 20-second parsing window. Scanned/image-only or encrypted files may not provide readable text. PDF import needs an internet connection and an `https://` or local HTTP page; browsers may block the module library from a `file://` page. Plan generation and print export do not depend on PDF import.
+
+Generated exercise details are escaped before being added to the page. Keep that rule if user-controlled content is added later. The policy is delivered as an HTML meta policy, so it cannot replace response-header protections such as frame-ancestor restrictions.
 
 ## Training targets
 

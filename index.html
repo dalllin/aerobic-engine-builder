@@ -1,54 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aerobic Architect</title>
-
-<link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="description"
+        content="Build a two-week aerobic training plan with full-body strength and stability work."
+    >
+    <title>Aerobic System Builder</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
 </head>
 <body>
+    <main class="container">
+        <header class="hero">
+            <p class="eyebrow">A TWO-WEEK TRAINING PLANNER</p>
+            <h1>Build a stronger aerobic system.</h1>
+            <p class="intro">
+                Balance easy endurance, faster aerobic work, and full-body strength.
+                The plan also includes exercises for your core, hips, calves, and ankles.
+            </p>
+            <a
+                class="video-link"
+                href="https://www.youtube.com/watch?v=HuY7wmJC7eM"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                Inspired by Nicklas Rossner’s aerobic-system video
+                <span aria-hidden="true">↗</span>
+            </a>
+        </header>
 
-<div class="container">
+        <section class="planner" aria-labelledby="planner-title">
+            <div class="section-heading">
+                <p class="eyebrow">MAKE IT YOURS</p>
+                <h2 id="planner-title">Build your 14-day plan</h2>
+            </div>
 
-    <h1>Aerobic Architect</h1>
-    <p>Create a 2-week aerobic-focused training plan.</p>
+            <form id="planner-form" class="controls">
+                <div class="field">
+                    <label for="fitness">Current training experience</label>
+                    <select id="fitness" name="fitness">
+                        <option value="beginner">Beginner or returning</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
 
-    <div class="card">
+                <div class="field">
+                    <label for="days">Days available each week</label>
+                    <select id="days" name="days">
+                        <option value="3">3 days</option>
+                        <option value="4">4 days</option>
+                        <option value="5" selected>5 days</option>
+                        <option value="6">6 days</option>
+                        <option value="7">7 days</option>
+                    </select>
+                </div>
 
-        <label>Fitness Level</label>
-        <select id="fitnessLevel">
-            <option>Beginner</option>
-            <option>Intermediate</option>
-            <option>Advanced</option>
-        </select>
+                <button type="submit">Generate my plan <span aria-hidden="true">→</span></button>
+            </form>
 
-        <label>Days Per Week</label>
-        <select id="daysPerWeek">
-            <option>3</option>
-            <option>4</option>
-            <option selected>5</option>
-            <option>6</option>
-        </select>
+            <p class="form-note">
+                Days available sets the schedule limit. Rest and recovery are part of training.
+            </p>
+        </section>
 
-        <label>Equipment</label>
-        <select id="equipment">
-            <option>Bodyweight</option>
-            <option>Dumbbells</option>
-            <option>Full Gym</option>
-        </select>
+        <p id="plan-summary" class="plan-summary" aria-live="polite" hidden></p>
 
-        <button onclick="generatePlan()">
-            Generate Plan
-        </button>
+        <section
+            id="results"
+            class="results"
+            aria-labelledby="results-title"
+        >
+            <h2 id="results-title" class="visually-hidden">Your two-week plan</h2>
+        </section>
 
-    </div>
+        <aside class="info-card">
+            <p class="eyebrow">WHAT THE PLAN COVERS</p>
+            <h2>Aerobic work and whole-body support</h2>
+            <p>
+                Strength sessions combine squat or split-squat, hip-hinge, push, pull,
+                and core movements. Calf, ankle, and hip stability work adds support
+                around common running movements.
+            </p>
+            <p class="small-note">
+                This is an educational template, not a personalized medical plan.
+                Scale it to what you currently tolerate, and take extra rest when needed.
+            </p>
+        </aside>
 
-    <div id="plan"></div>
-
-</div>
-
-<script src="script.js"></script>
-
+        <footer class="footer">
+            Keep easy sessions comfortable. Build duration and faster efforts gradually.
+        </footer>
+    </main>
 </body>
 </html>

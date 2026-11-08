@@ -174,10 +174,15 @@ function buildWeek(level, daysAvailable, weekIndex) {
 }
 
 function renderDay(day, dayIndex, weekIndex) {
+    const dayNumber = weekIndex * 7 + dayIndex + 1;
+
     return `
         <article class="day-card day-card--${day.category}">
             <div class="day-card-top">
-                <p class="day-name">${weekdays[dayIndex]}</p>
+                <p class="day-name">
+                    <span class="day-count">DAY ${dayNumber}</span>
+                    <span>${weekdays[dayIndex]}</span>
+                </p>
                 <span class="tag">${day.tag}</span>
             </div>
             <h3>${day.title}</h3>
@@ -195,8 +200,10 @@ function renderWeek(days, weekIndex) {
                 <p class="eyebrow">WEEK ${weekIndex + 1}</p>
                 <h2 id="week-${weekIndex + 1}-title">${weekTitle}</h2>
             </div>
-            <div class="day-grid">
-                ${days.map((day, dayIndex) => renderDay(day, dayIndex, weekIndex)).join("")}
+            <div class="week-grid-scroll">
+                <div class="day-grid">
+                    ${days.map((day, dayIndex) => renderDay(day, dayIndex, weekIndex)).join("")}
+                </div>
             </div>
         </section>
     `;

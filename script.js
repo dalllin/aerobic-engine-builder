@@ -1,107 +1,161 @@
-function generatePlan() {
+const cardioOptions = [
+    "Brisk Walk",
+    "Cycling",
+    "Jogging",
+    "Rowing",
+    "Elliptical"
+];
 
-    const workouts = [
+const strengthWorkouts = [
 
-        {
-            title: "Zone 2 + Core Stability",
-            details:
-                "30-45 minute easy cardio + Bird Dogs + Side Planks"
-        },
+{
+title:"Lower Body + Stability",
 
-        {
-            title: "Upper Body + Shoulder Stability",
-            details:
-                "Pushups, Rows, Face Pulls, External Rotations"
-        },
+exercises:[
+"Goblet Squat",
+"Reverse Lunge",
+"Single-Leg Deadlift",
+"Calf Raise",
+"Tibialis Raise"
+]
+},
 
-        {
-            title: "Threshold Session",
-            details:
-                "3 x 10 minutes comfortably hard effort"
-        },
+{
+title:"Upper Body Push",
 
-        {
-            title: "Recovery Day",
-            details:
-                "Easy walk and mobility work"
-        },
+exercises:[
+"Pushups",
+"Dumbbell Press",
+"Shoulder Press",
+"Band External Rotation",
+"Wall Slides"
+]
+},
 
-        {
-            title: "Lower Body + Hip Stability",
-            details:
-                "Squats, Split Squats, Clamshells, Monster Walks"
-        },
+{
+title:"Upper Body Pull",
 
-        {
-            title: "Long Aerobic Session",
-            details:
-                "60-90 minute Zone 2 session"
-        },
+exercises:[
+"Rows",
+"Band Pull Apart",
+"Face Pull",
+"Farmer Carry",
+"Rear Delt Fly"
+]
+},
 
-        {
-            title: "Recovery Day",
-            details:
-                "Stretching and mobility"
-        },
+{
+title:"Core + Stabilizers",
 
-        {
-            title: "VO2 Max Session",
-            details:
-                "4 x 4 minute hard intervals"
-        },
+exercises:[
+"Bird Dog",
+"Dead Bug",
+"Side Plank",
+"Pallof Press",
+"Glute Bridge"
+]
+}
+];
 
-        {
-            title: "Upper Body Strength",
-            details:
-                "Pushups, Rows, Presses"
-        },
+const mobilityExercises = [
+"Hip Flexor Stretch",
+"Thoracic Rotation",
+"Ankle Mobility",
+"Hamstring Stretch",
+"Cat Cow"
+];
 
-        {
-            title: "Recovery Day",
-            details:
-                "Easy walk"
-        },
+function getCardioDuration(level){
 
-        {
-            title: "Sprint Session",
-            details:
-                "6 x 15 second hill sprints"
-        },
+    if(level === "Beginner") return 30;
+    if(level === "Intermediate") return 45;
+    return 60;
+}
 
-        {
-            title: "Lower Body + Ankle Stability",
-            details:
-                "Lunges, Calf Raises, Single Leg Balance"
-        },
+function generatePlan(){
 
-        {
-            title: "Long Aerobic Session",
-            details:
-                "60-90 minute Zone 2 workout"
-        },
+    const level =
+        document.getElementById("fitnessLevel").value;
 
-        {
-            title: "Rest Day",
-            details:
-                "Complete recovery"
+    const daysPerWeek =
+        Number(document.getElementById("daysPerWeek").value);
+
+    let output = "";
+
+    for(let day=1; day<=14; day++){
+
+        const dayOfWeek =
+            ((day-1)%7)+1;
+
+        const workout =
+            strengthWorkouts[
+                (day-1)%strengthWorkouts.length
+            ];
+
+        const cardio =
+            cardioOptions[
+                Math.floor(
+                    Math.random()*cardioOptions.length
+                )
+            ];
+
+        const mobility =
+            mobilityExercises[
+                (day-1)%mobilityExercises.length
+            ];
+
+        const trainingDay =
+            dayOfWeek <= daysPerWeek;
+
+        if(trainingDay){
+
+            output += `
+            <div class="day-card">
+
+                <h2>Day ${day}</h2>
+
+                <h3>Aerobic Training</h3>
+
+                <p>
+                ${cardio}
+                -
+                ${getCardioDuration(level)} min Zone 2
+                </p>
+
+                <h3>${workout.title}</h3>
+
+                <ul>
+                    ${workout.exercises
+                        .map(e=>`<li>${e}</li>`)
+                        .join("")}
+                </ul>
+
+                <h3>Mobility</h3>
+
+                <p>${mobility}</p>
+
+            </div>
+            `;
         }
-    ];
+        else{
 
-    const results = document.getElementById("results");
+            output += `
+            <div class="day-card">
 
-    let html = "<h2>Your 14-Day Plan</h2>";
+                <h2>Day ${day}</h2>
 
-    workouts.forEach((workout, index) => {
+                <h3>Recovery Day</h3>
 
-        html += `
-        <div class="day-card">
-            <h3>Day ${index + 1}</h3>
-            <strong>${workout.title}</strong>
-            <p>${workout.details}</p>
-        </div>
-        `;
+                <p>
+                Easy walk, mobility work,
+                and full recovery.
+                </p>
 
-    });
+            </div>
+            `;
+        }
+    }
 
-    results.innerHTML = html;
+    document.getElementById("plan").innerHTML =
+        output;
 }

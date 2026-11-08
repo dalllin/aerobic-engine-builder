@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta
-        name="description"
-        content="Build a two-week aerobic training plan with full-body strength and stability work."
-    >
+    <meta name="description" content="Create a two-week aerobic training plan with strength, stability, and recovery sessions.">
+    <meta name="theme-color" content="#173d34">
     <title>Aerobic System Builder</title>
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
@@ -17,84 +15,161 @@
             <p class="eyebrow">A TWO-WEEK TRAINING PLANNER</p>
             <h1>Build a stronger aerobic system.</h1>
             <p class="intro">
-                Balance easy endurance, faster aerobic work, and full-body strength.
-                The plan also includes exercises for your core, hips, calves, and ankles.
+                Make a practical plan around your schedule, favorite activities, and current training.
+                Each week balances aerobic work, whole-body strength, and recovery.
             </p>
-            <a
-                class="video-link"
-                href="https://www.youtube.com/watch?v=HuY7wmJC7eM"
-                target="_blank"
-                rel="noopener noreferrer"
-            >
-                Inspired by Nicklas Rossner’s aerobic-system video
-                <span aria-hidden="true">↗</span>
+            <a class="video-link" href="https://www.youtube.com/watch?v=HuY7wmJC7eM" target="_blank" rel="noopener noreferrer">
+                Inspired by Nicklas Rossner’s aerobic-system video <span aria-hidden="true">↗</span>
             </a>
         </header>
 
         <section class="planner" aria-labelledby="planner-title">
             <div class="section-heading">
-                <p class="eyebrow">MAKE IT YOURS</p>
-                <h2 id="planner-title">Build your 14-day plan</h2>
+                <p class="eyebrow">YOUR STARTING POINT</p>
+                <h2 id="planner-title">Shape your plan</h2>
+                <p class="section-copy">Choose what fits. The planner keeps sessions within your time limit and uses your feedback to set the starting workload.</p>
             </div>
 
-            <form id="planner-form" class="controls">
-                <div class="field">
-                    <label for="fitness">Current training experience</label>
-                    <select id="fitness" name="fitness">
-                        <option value="beginner">Beginner or returning</option>
-                        <option value="intermediate">Intermediate</option>
-                        <option value="advanced">Advanced</option>
-                    </select>
+            <form id="planner-form">
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="fitness">Current training experience</label>
+                        <select id="fitness" name="fitness">
+                            <option value="beginner">New or returning</option>
+                            <option value="intermediate">Consistent training</option>
+                            <option value="advanced">Experienced</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="days">Days available each week</label>
+                        <select id="days" name="days">
+                            <option value="3">3 days</option>
+                            <option value="4">4 days</option>
+                            <option value="5" selected>5 days</option>
+                            <option value="6">6 days</option>
+                            <option value="7">7 days</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="time-limit">Maximum time per session</label>
+                        <select id="time-limit" name="time-limit">
+                            <option value="20">20 minutes</option>
+                            <option value="30">30 minutes</option>
+                            <option value="45" selected>45 minutes</option>
+                            <option value="60">60 minutes</option>
+                            <option value="90">90 minutes</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="previous-response">How did your previous plan feel?</label>
+                        <select id="previous-response" name="previous-response">
+                            <option value="new">No previous plan / not sure</option>
+                            <option value="manageable">Manageable; completed most sessions</option>
+                            <option value="too-easy">Too easy; recovered well</option>
+                            <option value="too-hard">Too hard or recovery was poor</option>
+                            <option value="missed">Missed several sessions</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div class="field">
-                    <label for="days">Days available each week</label>
-                    <select id="days" name="days">
-                        <option value="3">3 days</option>
-                        <option value="4">4 days</option>
-                        <option value="5" selected>5 days</option>
-                        <option value="6">6 days</option>
-                        <option value="7">7 days</option>
-                    </select>
-                </div>
+                <fieldset class="choice-group">
+                    <legend>Activities and equipment you enjoy</legend>
+                    <p class="help-text">Pick any. These guide activity and equipment choices; leave blank for a mixed plan.</p>
+                    <div class="choice-grid">
+                        <label class="choice"><input type="checkbox" name="favorites" value="run"> <span>Running / run-walk</span></label>
+                        <label class="choice"><input type="checkbox" name="favorites" value="walk"> <span>Brisk walks / hiking</span></label>
+                        <label class="choice"><input type="checkbox" name="favorites" value="cycle"> <span>Cycling</span></label>
+                        <label class="choice"><input type="checkbox" name="favorites" value="row"> <span>Rowing</span></label>
+                        <label class="choice"><input type="checkbox" name="favorites" value="swim"> <span>Swimming</span></label>
+                        <label class="choice"><input type="checkbox" name="favorites" value="elliptical"> <span>Elliptical</span></label>
+                        <label class="choice"><input type="checkbox" name="favorites" value="bodyweight"> <span>Bodyweight strength</span></label>
+                        <label class="choice"><input type="checkbox" name="favorites" value="bands"> <span>Resistance bands</span></label>
+                        <label class="choice"><input type="checkbox" name="favorites" value="weights"> <span>Dumbbells / weights</span></label>
+                        <label class="choice"><input type="checkbox" name="favorites" value="machines"> <span>Gym machines</span></label>
+                        <label class="choice"><input type="checkbox" name="favorites" value="mobility"> <span>Mobility / balance</span></label>
+                        <label class="choice"><input type="checkbox" name="favorites" value="hills"> <span>Hills / short strides</span></label>
+                        <label class="choice"><input type="checkbox" name="favorites" value="tempo"> <span>Tempo / threshold workouts</span></label>
+                        <label class="choice"><input type="checkbox" name="favorites" value="intervals"> <span>VO₂-style intervals</span></label>
+                        <label class="choice"><input type="checkbox" name="favorites" value="long"> <span>Long easy endurance</span></label>
+                    </div>
+                </fieldset>
 
-                <button type="submit">Generate my plan <span aria-hidden="true">→</span></button>
+                <fieldset class="choice-group">
+                    <legend>Areas to support</legend>
+                    <p class="help-text">Choose the areas you want the surrounding muscles to work. This is not a joint rehabilitation plan.</p>
+                    <div class="choice-grid joint-grid">
+                        <label class="choice"><input type="checkbox" name="joints" value="knee"> <span>Knees</span></label>
+                        <label class="choice"><input type="checkbox" name="joints" value="ankle"> <span>Ankles</span></label>
+                        <label class="choice"><input type="checkbox" name="joints" value="hip"> <span>Hips</span></label>
+                        <label class="choice"><input type="checkbox" name="joints" value="shoulder"> <span>Shoulders</span></label>
+                        <label class="choice"><input type="checkbox" name="joints" value="wrist"> <span>Wrists / elbows</span></label>
+                    </div>
+                </fieldset>
+
+                <fieldset class="choice-group history-group">
+                    <legend>Bring in a previous plan</legend>
+                    <p class="help-text">Upload a PDF from this planner for the clearest carry-over. Other text-based workout PDFs can inform activity choices, but they do not tell us what you completed.</p>
+                    <div class="upload-row">
+                        <label class="file-picker" for="previous-pdf">Choose previous plan PDF</label>
+                        <input id="previous-pdf" type="file" accept="application/pdf,.pdf">
+                        <span id="file-name" class="file-name">No file selected</span>
+                    </div>
+                    <p id="pdf-status" class="status" aria-live="polite">The file is read in this browser and is not uploaded or saved.</p>
+                </fieldset>
+
+                <div class="form-actions">
+                    <button class="primary-button" type="submit">Generate my two-week plan <span aria-hidden="true">→</span></button>
+                    <p class="form-note">You can change your choices and generate a new version any time.</p>
+                </div>
+                <p id="app-status" class="app-status" role="status" aria-live="polite">Loading planner…</p>
             </form>
-
-            <p class="form-note">
-                Days available sets the schedule limit. Rest and recovery are part of training.
-            </p>
         </section>
 
-        <p id="plan-summary" class="plan-summary" aria-live="polite" hidden></p>
-        <p class="schedule-hint">
-            Each week is one row of seven days. On a smaller screen, swipe sideways to see the whole row.
-        </p>
-        <section
-            id="results"
-            class="results"
-            aria-labelledby="results-title"
-        >
-            <h2 id="results-title" class="visually-hidden">Your two-week plan</h2>
+        <section id="plan-output" class="plan-output" aria-labelledby="output-title" hidden>
+            <div class="output-heading">
+                <div>
+                    <p class="eyebrow">YOUR 14-DAY PLAN</p>
+                    <h2 id="output-title">A plan built around your week</h2>
+                    <p id="plan-summary" class="plan-summary" aria-live="polite"></p>
+                </div>
+                <button id="export-pdf" class="secondary-button" type="button">Save as PDF <span aria-hidden="true">↓</span></button>
+            </div>
+
+            <p id="print-record" class="print-record"></p>
+            <div id="metrics" class="metrics" aria-label="Weekly plan targets"></div>
+            <p id="progression-note" class="progression-note"></p>
+            <div id="weeks" class="weeks"></div>
+
+            <details class="guidelines">
+                <summary>Sets, reps, effort, and progression</summary>
+                <div class="guideline-content">
+                    <ul>
+                        <li><strong>Strength:</strong> Use the sets, rep range, rest, and reps-in-reserve shown on each session. Finish each set with a few good reps still possible; no maximum lifts are needed.</li>
+                        <li><strong>Progress:</strong> When all sets reach the top of the rep range with controlled form for two sessions, add a small amount of resistance or use a slightly harder variation. Change one thing at a time.</li>
+                        <li><strong>Aerobic effort:</strong> Easy sessions should let you speak in full sentences. Threshold work is controlled and comfortably hard. Faster intervals are optional and should remain repeatable.</li>
+                        <li><strong>Recovery:</strong> Rest days are part of the plan. If you miss a session, resume with the next planned day instead of cramming workouts together.</li>
+                    </ul>
+                    <p>General adult guidance is 150–300 minutes of moderate aerobic activity each week and muscle-strengthening activity for major muscle groups on at least 2 days. This planner can start below that level and build toward it over time.</p>
+                </div>
+            </details>
+
         </section>
 
         <aside class="info-card">
-            <p class="eyebrow">WHAT THE PLAN COVERS</p>
-            <h2>Aerobic work and whole-body support</h2>
-            <p>
-                Strength sessions combine squat or split-squat, hip-hinge, push, pull,
-                and core movements. Calf, ankle, and hip stability work adds support
-                around common running movements.
-            </p>
-            <p class="small-note">
-                This is an educational template, not a personalized medical plan.
-                Scale it to what you currently tolerate, and take extra rest when needed.
-            </p>
+            <p class="eyebrow">THE TRAINING MIX</p>
+            <h2>Aerobic work plus whole-body support</h2>
+            <p>Sessions can include easy endurance, threshold work, VO₂-style intervals, short fast efforts, and strength for legs, hips, back, chest, shoulders, arms, and trunk.</p>
+            <p class="small-note">The joint-support choices select nearby muscle and balance work; they do not diagnose or treat pain or injury. Stop any movement that causes sharp or increasing pain and seek qualified advice for an injury or medical condition.</p>
         </aside>
 
         <footer class="footer">
-            Keep easy sessions comfortable. Build duration and faster efforts gradually.
+            <p>Educational planning tool for generally healthy adults. The plan scales to the selections above and cannot guarantee injury prevention.</p>
+            <p class="source-links">
+                <a href="https://odphp.health.gov/our-work/nutrition-physical-activity/physical-activity-guidelines/about-physical-activity-guidelines/questions-answers" target="_blank" rel="noopener noreferrer">U.S. Physical Activity Guidelines</a>
+                <a href="https://acsm.org/resistance-training-guidelines-update-2026/" target="_blank" rel="noopener noreferrer">ACSM resistance training guidance</a>
+            </p>
         </footer>
     </main>
+    <div id="exercise-tooltip" class="exercise-tooltip" role="tooltip" hidden></div>
 </body>
 </html>

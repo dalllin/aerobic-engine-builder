@@ -5,6 +5,7 @@ const MAX_PDF_BYTES = 10 * 1024 * 1024;
 const MAX_PDF_PAGES = 30;
 const MAX_PDF_TEXT_CHARS = 200000;
 const MAX_PDF_PARSE_MS = 20000;
+const PLANNER_STORAGE_KEY = "aerobic-engine-builder-v1";
 
 const form = document.getElementById("planner-form");
 const output = document.getElementById("plan-output");
@@ -16,6 +17,7 @@ const pdfInput = document.getElementById("previous-pdf");
 const pdfStatus = document.getElementById("pdf-status");
 const fileName = document.getElementById("file-name");
 const appStatus = document.getElementById("app-status");
+const storageStatus = document.getElementById("storage-status");
 const exerciseTooltip = document.getElementById("exercise-tooltip");
 
 const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -866,7 +868,7 @@ function updatePrintRecord(profile, weeks) {
     document.getElementById("print-record").textContent = `PLAN RECORD FOR FUTURE IMPORT: ${record}`;
 }
 
-function generatePlan() {
+function generatePlan({ scroll = true } = {}) {
     const profile = normalizeProfile();
     const weeks = [buildWeek(profile, 0), buildWeek(profile, 1)];
     latestPlan = { profile, weeks };
@@ -877,7 +879,66 @@ function generatePlan() {
     weeksElement.innerHTML = weeks.map(renderWeek).join("");
     updatePrintRecord(profile, weeks);
     output.hidden = false;
-    output.scrollIntoView({ behavior: "smooth", block: "start" });
+    savePlannerState(true);
+    if (scroll) output.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function savePlannerState(hasGeneratedPlan = false) {
+    try {
+        const allowedFavorites = [...document.querySelectorAll('input[name="favorites"]')];
+        const allowedJoints = [...document.querySelectorAll('input[name="joints"]')];
+        const saved = {
+            version: 1,
+            fitness: document.getElementById("fitness").value,
+            days: document.getElementById("days").value,
+            time: document.getElementById("time-limit").value,
+            response: document.getElementById("previous-response").value,
+            favorites: allowedFavorites.filter((item) => item.checked).map((item) => item.value),
+            joints: allowedJoints.filter((item) => item.checked).map((item) => item.value),
+            hasGeneratedPlan
+        };
+        localStorage.setItem(PLANNER_STORAGE_KEY, JSON.stringify(saved));
+        storageStatus.textContent = "Your selections are saved on this device; a generated plan will be rebuilt from them when you return. Uploaded PDFs are never saved.";
+        return true;
+    } catch {
+        storageStatus.textContent = "Browser storage is unavailable here. Your plan will work, but selections won’t persist after closing the page.";
+        return false;
+    }
+}
+
+function restorePlannerState() {
+    try {
+        const probeKey = `${PLANNER_STORAGE_KEY}-availability-check`;
+        localStorage.setItem(probeKey, "ok");
+        localStorage.removeItem(probeKey);
+        const raw = localStorage.getItem(PLANNER_STORAGE_KEY);
+        if (!raw) {
+            storageStatus.textContent = "Browser storage is available. Your selections are saved here, and a generated plan will be rebuilt when you return.";
+            return;
+        }
+        const saved = JSON.parse(raw);
+        if (!saved || saved.version !== 1) throw new Error("Unsupported saved planner data");
+
+        const setIfValid = (id, value, allowed) => {
+            if (allowed.includes(String(value))) document.getElementById(id).value = String(value);
+        };
+        setIfValid("fitness", saved.fitness, ["beginner", "intermediate", "advanced"]);
+        setIfValid("days", saved.days, ["3", "4", "5", "6", "7"]);
+        setIfValid("time-limit", saved.time, ["20", "30", "45", "60", "90"]);
+        setIfValid("previous-response", saved.response, ["new", "manageable", "too-easy", "too-hard", "missed"]);
+        const favorites = new Set(Array.isArray(saved.favorites) ? saved.favorites : []);
+        const joints = new Set(Array.isArray(saved.joints) ? saved.joints : []);
+        document.querySelectorAll('input[name="favorites"]').forEach((item) => { item.checked = favorites.has(item.value); });
+        document.querySelectorAll('input[name="joints"]').forEach((item) => { item.checked = joints.has(item.value); });
+
+        storageStatus.textContent = "Saved selections restored from this browser. A plan is rebuilt from those choices; uploaded PDFs are not saved and must be imported again.";
+        if (saved.hasGeneratedPlan === true) {
+            generatePlan({ scroll: false });
+            appStatus.textContent = "Your saved two-week plan is ready below.";
+        }
+    } catch {
+        storageStatus.textContent = "Browser storage is unavailable or its saved data could not be read. You can still build a plan.";
+    }
 }
 
 function setPdfStatus(message, state = "") {
@@ -1036,9 +1097,13 @@ form.addEventListener("submit", (event) => {
     }
 });
 
+form.addEventListener("input", () => savePlannerState(false));
+form.addEventListener("change", () => savePlannerState(false));
+
 document.getElementById("export-pdf").addEventListener("click", () => {
     if (!latestPlan) return;
     window.print();
 });
 
 appStatus.textContent = "Planner ready. Choose your options and generate a plan.";
+restorePlannerState();

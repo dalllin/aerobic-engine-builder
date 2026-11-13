@@ -7,8 +7,11 @@ A static, client-side two-week training planner for GitHub Pages.
 - `index.html` — planner form, plan output, and page structure.
 - `style.css` — responsive styling and print-to-PDF layout.
 - `script.js` — plan rules, exercise selection, PDF import, and PDF export.
+- `meal-planner.html`, `meal-planner.css`, and `meal-planner.js` — companion meal planner with TheMealDB recipe search, pantry-overlap planning, and editable grocery estimates.
 
 Copy these three files into the root of a GitHub repository or its published `/docs` folder, then enable GitHub Pages for that location. The files use relative paths, so the page can be hosted under a project subpath.
+
+For both pages, copy all six HTML/CSS/JavaScript files into the same published folder. Meal search needs internet access. It queries TheMealDB's public V1 API and links out to recipe sources. The meal budget is a transparent rough estimate (default $2.25 per person per dinner) that users can replace with their local basket total; ingredient links open Walmart search results, not live store prices. Nutrition tags are ingredient-based signals, not calculated nutrient data.
 
 The main planner uses a deferred regular script, so plan generation also works when opening `index.html` directly. Replace `index.html` as well as `script.js`; the script tag change is what avoids module-loading restrictions during local preview.
 
@@ -31,6 +34,8 @@ The main planner uses a deferred regular script, so plan generation also works w
 PDF import uses Mozilla PDF.js `6.5.438`, loaded from a version-pinned jsDelivr path only when a PDF is selected. The Content Security Policy restricts this external code to that version's build directory. The library runs in the browser and can access the page; PDF text is not intentionally sent to a server. The site has no upload endpoint, does not save the file, and does not store the extracted text. Import is limited to 10 MB, 30 pages, 200,000 extracted text characters, and a 20-second parsing window. Scanned/image-only or encrypted files may not provide readable text. PDF import needs an internet connection and an `https://` or local HTTP page; browsers may block the module library from a `file://` page. Plan generation and print export do not depend on PDF import.
 
 Generated exercise details are escaped before being added to the page. Keep that rule if user-controlled content is added later. The policy is delivered as an HTML meta policy, so it cannot replace response-header protections such as frame-ancestor restrictions.
+
+The aerobic planner saves the selected training level, weekly days, time cap, prior-plan feedback, activity preferences, joint-support choices, and whether a plan had been generated in this browser's local storage. On return, it restores those selections and rebuilds the plan. Uploaded PDFs and their extracted text are not saved. Browser storage may be unavailable or behave differently when the page is opened directly as a `file://` URL; the page reports when it cannot save.
 
 ## Training targets
 

@@ -1,17 +1,22 @@
 <!DOCTYPE html>
+<!-- This file is the page structure. HTML elements describe content; CSS styles them and JavaScript makes the planner interactive. -->
 <html lang="en">
 <head>
+    <!-- These settings help browsers display the page correctly on phones and describe it to search engines. -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Create a two-week aerobic training plan with strength, stability, and recovery sessions.">
     <meta name="theme-color" content="#173d34">
+    <!-- Content Security Policy (CSP) is a browser rule that limits where the page can load code and other resources from. -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net/npm/pdfjs-dist@6.5.438/build/; worker-src 'self' blob: https://cdn.jsdelivr.net/npm/pdfjs-dist@6.5.438/build/; connect-src 'self' https://cdn.jsdelivr.net/npm/pdfjs-dist@6.5.438/build/; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self'; form-action 'self'">
     <title>Aerobic System Builder</title>
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
 </head>
 <body>
+    <!-- The main container keeps the page content centered and readable. -->
     <main class="container">
+        <!-- Introductory banner with the site purpose and source video. -->
         <header class="hero">
             <p class="eyebrow">A TWO-WEEK TRAINING PLANNER</p>
             <h1>Build a stronger aerobic system.</h1>
@@ -25,6 +30,7 @@
             <p><a class="video-link" href="meal-planner.html">Plan affordable meals with the companion site →</a></p>
         </header>
 
+        <!-- The form gathers choices used by the workout-planning algorithm. -->
         <section class="planner" aria-labelledby="planner-title">
             <div class="section-heading">
                 <p class="eyebrow">YOUR STARTING POINT</p>
@@ -33,6 +39,7 @@
             </div>
 
             <form id="planner-form">
+                <!-- Select menus collect training experience, available days, time, and feedback. -->
                 <div class="form-grid">
                     <div class="field">
                         <label for="fitness">Current training experience</label>
@@ -74,6 +81,7 @@
                     </div>
                 </div>
 
+                <!-- Checkboxes let the person select preferred activities and equipment. -->
                 <fieldset class="choice-group">
                     <legend>Activities and equipment you enjoy</legend>
                     <p class="help-text">Pick any. These guide activity and equipment choices; leave blank for a mixed plan.</p>
@@ -96,6 +104,7 @@
                     </div>
                 </fieldset>
 
+                <!-- These choices add support exercises for nearby muscles; they are not medical treatment. -->
                 <fieldset class="choice-group">
                     <legend>Areas to support</legend>
                     <p class="help-text">Choose the areas you want the surrounding muscles to work. This is not a joint rehabilitation plan.</p>
@@ -108,6 +117,7 @@
                     </div>
                 </fieldset>
 
+                <!-- An optional PDF can inform the next plan. The browser reads it locally instead of uploading it. -->
                 <fieldset class="choice-group history-group">
                     <legend>Bring in a previous plan</legend>
                     <p class="help-text">Upload a PDF from this planner for the clearest carry-over. Other text-based workout PDFs can inform activity choices, but they do not tell us what you completed.</p>
@@ -119,6 +129,7 @@
                     <p id="pdf-status" class="status" aria-live="polite">The file is read in this browser and is not uploaded or saved.</p>
                 </fieldset>
 
+                <!-- Submitting the form generates the plan. The status messages explain progress and storage availability. -->
                 <div class="form-actions">
                     <button class="primary-button" type="submit">Generate my two-week plan <span aria-hidden="true">→</span></button>
                     <p class="form-note">You can change your choices and generate a new version any time.</p>
@@ -128,6 +139,7 @@
             </form>
         </section>
 
+        <!-- JavaScript fills this section with the two-week plan and reveals it after generation. -->
         <section id="plan-output" class="plan-output" aria-labelledby="output-title" hidden>
             <div class="output-heading">
                 <div>
@@ -143,6 +155,7 @@
             <p id="progression-note" class="progression-note"></p>
             <div id="weeks" class="weeks"></div>
 
+            <!-- Extra guidance is collapsed by default; users can open it when needed. -->
             <details class="guidelines">
                 <summary>Sets, reps, effort, and progression</summary>
                 <div class="guideline-content">
@@ -158,6 +171,7 @@
 
         </section>
 
+        <!-- Safety notes and sources provide context for the exercise suggestions. -->
         <aside class="info-card">
             <p class="eyebrow">THE TRAINING MIX</p>
             <h2>Aerobic work plus whole-body support</h2>
@@ -165,6 +179,7 @@
             <p class="small-note">The joint-support choices select nearby muscle and balance work; they do not diagnose or treat pain or injury. Stop any movement that causes sharp or increasing pain and seek qualified advice for an injury or medical condition.</p>
         </aside>
 
+        <!-- Footer links point to the public sources used for general guidance. -->
         <footer class="footer">
             <p>Educational planning tool for generally healthy adults. The plan scales to the selections above and cannot guarantee injury prevention.</p>
             <p class="source-links">
@@ -173,6 +188,7 @@
             </p>
         </footer>
     </main>
+    <!-- JavaScript places exercise instructions in this floating tooltip when focused or hovered. -->
     <div id="exercise-tooltip" class="exercise-tooltip" role="tooltip" hidden></div>
 </body>
 </html>

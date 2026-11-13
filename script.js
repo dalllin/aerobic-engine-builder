@@ -1,3 +1,5 @@
+// This file contains the planner's rules and interactive behavior. A constant (const) is a named value the program does not reassign.
+// PDF.js is an outside library: a package of ready-made code used here to read text from PDF files.
 const PDFJS_VERSION = "6.5.438";
 const PDFJS_URL = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/build/pdf.mjs`;
 const PDFJS_WORKER_URL = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/build/pdf.worker.mjs`;
@@ -7,6 +9,7 @@ const MAX_PDF_TEXT_CHARS = 200000;
 const MAX_PDF_PARSE_MS = 20000;
 const PLANNER_STORAGE_KEY = "aerobic-engine-builder-v1";
 
+// Find the HTML elements JavaScript will read or update. The DOM (Document Object Model) is the browser's in-memory version of the page.
 const form = document.getElementById("planner-form");
 const output = document.getElementById("plan-output");
 const summary = document.getElementById("plan-summary");
@@ -20,8 +23,10 @@ const appStatus = document.getElementById("app-status");
 const storageStatus = document.getElementById("storage-status");
 const exerciseTooltip = document.getElementById("exercise-tooltip");
 
+// These arrays (ordered lists) and objects (named groups of related values) are the planner's reference data.
 const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
+// Default weekly workload and strength targets for each experience level.
 const levelSettings = {
     beginner: {
         label: "New or returning",
@@ -52,6 +57,7 @@ const levelSettings = {
     }
 };
 
+// Maps short option values from the form to readable activity names.
 const cardioModes = {
     run: { label: "run or run-walk", title: "Running / run-walk" },
     walk: { label: "brisk walk or hike", title: "Walking / hiking" },
@@ -61,6 +67,7 @@ const cardioModes = {
     elliptical: { label: "elliptical", title: "Elliptical" }
 };
 
+// Labels used to match a person's preferences to exercise equipment and display text.
 const equipmentModes = ["bodyweight", "bands", "weights", "machines"];
 const favoriteLabels = {
     run: "running / run-walk",
@@ -88,6 +95,8 @@ const jointLabels = {
     wrist: "wrist / elbow-support work"
 };
 
+// Exercise library organized by movement pattern (the basic action, such as squat or push).
+// Each entry says which equipment it needs and which selected support areas it relates to.
 const movementLibrary = {
     squat: [
         { name: "chair squat", gear: "bodyweight", joints: ["knee", "hip"] },
@@ -130,6 +139,7 @@ const movementLibrary = {
     ]
 };
 
+// General instructions for each movement pattern; used when an exercise has no more specific note.
 const patternGuides = {
     squat: {
         description: "Lower your hips by bending at the hips and knees, then stand at a controlled pace.",
@@ -163,6 +173,7 @@ const patternGuides = {
     }
 };
 
+// Default descriptions, muscle focus, and form reminders for support exercises.
 const jointGuides = {
     knee: {
         description: "Use a light, controlled range for this knee-support variation.",
@@ -191,6 +202,7 @@ const jointGuides = {
     }
 };
 
+// Instructions for mobility and balance exercises that can appear as extra support work.
 const defaultSupportGuides = {
     "standing calf raise": {
         description: "Stand with feet hip-width apart and fingertips near a wall or rail. Rise straight up onto the balls of both feet, pause, then lower your heels slowly.",
@@ -216,6 +228,7 @@ const defaultSupportGuides = {
 
 // Exercise-specific instructions: setup and movement are described separately from
 // the muscle focus and form cue so users can understand unfamiliar variations.
+// More detailed instructions for each named exercise variation, shown in its popup.
 const exerciseGuides = {
     "chair squat": { description: "Stand in front of a sturdy chair with feet about hip-to-shoulder width apart. Send your hips back, bend your knees to lightly touch the chair, then stand.", focus: "Quadriceps and glutes, with controlled knee and hip alignment.", cue: "Keep your whole foot grounded and let your knees track in the same direction as your toes." },
     "box squat": { description: "Stand just in front of a stable box or bench. Push your hips back to sit lightly, keep your trunk steady, then press through your feet to stand.", focus: "Quadriceps and glutes, with controlled knee and hip alignment.", cue: "Touch the box softly; do not drop onto it or rock forward to stand." },
@@ -259,6 +272,7 @@ const exerciseGuides = {
     "light band wrist extension": { description: "Anchor a light band below your hand and sit with the forearm supported, palm down. Lift the back of your hand against the band, then return slowly.", focus: "Wrist extensor muscles on the back of the forearm.", cue: "Keep the forearm still and tension light; use a comfortable range." }
 };
 
+// Small accessory exercise lists for the body areas a person selected in the form.
 const jointSupportLibrary = {
     knee: [
         { name: "low step-down", gear: "bodyweight", dose: "8–10 each side" },
@@ -287,13 +301,16 @@ const jointSupportLibrary = {
     ]
 };
 
+// Temporary working data for this page visit. `let` marks a value that can change; the uploaded PDF itself is never stored.
 let previousPlanContext = null;
 let latestPlan = null;
 
+// Read the checked boxes in one group and return their values as a list.
 function selectedValues(name) {
     return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map((input) => input.value);
 }
 
+// Read form answers and replace any unexpected values with safe defaults before planning.
 function normalizeProfile() {
     const level = Object.hasOwn(levelSettings, document.getElementById("fitness").value)
         ? document.getElementById("fitness").value
@@ -315,18 +332,21 @@ function normalizeProfile() {
     };
 }
 
+// Pick a cardio activity from the user's preferences, or use a sensible default.
 function chooseCardioMode(profile, salt = 0) {
     const favorites = profile.favorites.filter((value) => Object.hasOwn(cardioModes, value));
     if (favorites.length) return favorites[salt % favorites.length];
     return profile.level === "beginner" ? "walk" : "run";
 }
 
+// Pick preferred strength equipment, defaulting to bodyweight if none was selected.
 function chooseEquipment(profile, salt = 0) {
     const preferred = profile.favorites.filter((value) => equipmentModes.includes(value));
     if (preferred.length) return preferred[salt % preferred.length];
     return "bodyweight";
 }
 
+// Rank exercise choices by equipment and support-area match, then return the best match.
 function chooseMovement(pattern, profile, salt = 0) {
     const options = movementLibrary[pattern];
     const equipment = chooseEquipment(profile, salt);
@@ -339,6 +359,7 @@ function chooseMovement(pattern, profile, salt = 0) {
     return ranked[0].item;
 }
 
+// Choose one accessory exercise for a selected support area.
 function chooseJointAccessory(joint, profile, salt = 0) {
     const options = jointSupportLibrary[joint] || [];
     if (!options.length) return null;
@@ -347,6 +368,7 @@ function chooseJointAccessory(joint, profile, salt = 0) {
     return ranked[0];
 }
 
+// Set workout volume and effort targets based on experience and the time available.
 function getStrengthTargets(profile, availableMinutes = profile.time) {
     const settings = levelSettings[profile.level];
     const sets = profile.level === "beginner" || availableMinutes <= 30 ? 2 : settings.sets;
@@ -359,6 +381,7 @@ function getStrengthTargets(profile, availableMinutes = profile.time) {
     };
 }
 
+// Build one full-body strength session (A or B), including optional support work.
 function strengthBlock(which, profile, weekIndex, availableMinutes = profile.time) {
     const focusedJoint = profile.joints.length
         ? profile.joints[(weekIndex + (which === "B" ? 1 : 0)) % profile.joints.length]
@@ -413,6 +436,7 @@ function strengthBlock(which, profile, weekIndex, availableMinutes = profile.tim
     };
 }
 
+// Describe the interval structure and intensity for a cardio quality session.
 function intervalDetails(kind, profile, minutes, feedback) {
     const warm = minutes <= 30 ? 3 : 6;
     const cool = minutes <= 30 ? 2 : 4;
@@ -440,6 +464,7 @@ function intervalDetails(kind, profile, minutes, feedback) {
     };
 }
 
+// Build an aerobic session such as easy endurance, threshold work, or short intervals.
 function cardioBlock(kind, profile, minutes, weekIndex, salt = 0) {
     const mode = cardioModes[chooseCardioMode(profile, salt)].label;
 
@@ -496,10 +521,12 @@ function cardioBlock(kind, profile, minutes, weekIndex, salt = 0) {
     };
 }
 
+// Create an empty recovery day for the weekly schedule.
 function blankDay() {
     return { kind: "rest", title: "Rest day", blocks: [] };
 }
 
+// Choose a weekly pattern of cardio, strength, combined sessions, and recovery.
 function buildWeekSpecs(daysAvailable, weekIndex) {
     const days = Array.from({ length: 7 }, blankDay);
     const quality = { kind: "quality" };
@@ -538,6 +565,7 @@ function buildWeekSpecs(daysAvailable, weekIndex) {
     return days;
 }
 
+// Estimate the most aerobic time that can fit into one session without exceeding its time cap.
 function getAerobicCapacity(spec, profile) {
     const cardioLimit = Math.max(8, profile.time - 8);
     if (spec.kind === "combo") return Math.max(6, Math.floor((profile.time - 4) * 0.42));
@@ -545,6 +573,7 @@ function getAerobicCapacity(spec, profile) {
     return 0;
 }
 
+// Spread a weekly aerobic-minute target across sessions, staying within each session's capacity.
 function distributeMinutes(target, capacities) {
     const values = capacities.map(() => 0);
     let remaining = Math.max(0, Math.min(target, capacities.reduce((sum, item) => sum + item, 0)));
@@ -567,6 +596,7 @@ function distributeMinutes(target, capacities) {
     return values;
 }
 
+// Adjust the starting weekly aerobic target using experience and prior-plan feedback.
 function requestedWeeklyMinutes(profile, weekIndex) {
     let target = levelSettings[profile.level].weeklyAerobicStart;
     const previousMinutes = previousPlanContext?.weeklyMinutes;
@@ -590,11 +620,13 @@ function requestedWeeklyMinutes(profile, weekIndex) {
     return Math.max(1, Math.round(Math.min(300, target)));
 }
 
+// Wrap the strength session in the data format used by the day cards.
 function buildStrength(profile, which, weekIndex, availableMinutes = profile.time) {
     const block = strengthBlock(which, profile, weekIndex, availableMinutes);
     return { ...block, duration: availableMinutes };
 }
 
+// Turn a schedule entry into a complete day, including optional weekend endurance choices.
 function buildDay(spec, profile, weekIndex, dayIndex, cardioMinutes) {
     if (spec.kind === "rest") {
         return {
@@ -665,6 +697,7 @@ function buildDay(spec, profile, weekIndex, dayIndex, cardioMinutes) {
     };
 }
 
+// Assemble seven days and calculate the week's aerobic and strength totals.
 function buildWeek(profile, weekIndex) {
     const specs = buildWeekSpecs(profile.days, weekIndex);
     const scheduledLongDay = specs.findIndex((spec) => spec.kind === "long" || (spec.kind === "combo" && spec.parts.some((part) => part.kind === "long")));
@@ -682,6 +715,7 @@ function buildWeek(profile, weekIndex) {
     return { days, cardioMinutes, strengthDays };
 }
 
+// Replace special HTML characters before putting text inside generated page markup.
 function escapeHTML(value) {
     return String(value).replace(/[&<>"']/g, (character) => ({
         "&": "&amp;",
@@ -692,6 +726,7 @@ function escapeHTML(value) {
     })[character]);
 }
 
+// Turn exercise data into one safe list item with details stored for its popup.
 function renderExerciseItem(exercise) {
     const guide = exerciseGuides[exercise.name] || exercise.guide || {
         description: "Use a controlled, comfortable range of motion.",
@@ -713,6 +748,7 @@ function renderExerciseItem(exercise) {
     `;
 }
 
+// Build the HTML for one activity block, such as cardio or strength, within a day.
 function renderBlock(block, dayTitle = "") {
     const safeTitle = escapeHTML(block.title || "Workout");
     const safeDetails = escapeHTML(block.details || "");
@@ -731,6 +767,7 @@ function renderBlock(block, dayTitle = "") {
     `;
 }
 
+// Build one calendar card and its activities from the generated day data.
 function renderDay(day, dayIndex, weekIndex) {
     const dayNumber = weekIndex * 7 + dayIndex + 1;
     const safeTitle = escapeHTML(day.title);
@@ -751,6 +788,7 @@ function renderDay(day, dayIndex, weekIndex) {
     `;
 }
 
+// Build a titled row containing the seven day cards for one week.
 function renderWeek(week, weekIndex) {
     const weekTitle = weekIndex === 0 ? "Build the foundation" : "Rotate the aerobic focus";
     return `
@@ -766,10 +804,12 @@ function renderWeek(week, weekIndex) {
     `;
 }
 
+// Build a small summary card for weekly totals or strength targets.
 function metricCard(label, value, detail) {
     return `<div class="metric"><span class="metric-label">${escapeHTML(label)}</span><strong class="metric-value">${escapeHTML(value)}</strong><span class="metric-detail">${escapeHTML(detail)}</span></div>`;
 }
 
+// Convert the selected settings into a short plain-language summary.
 function profileDescription(profile) {
     const favoriteValues = profile.favorites.map((value) => favoriteLabels[value]).filter(Boolean);
     const focusValues = profile.joints.map((value) => jointLabels[value]).filter(Boolean);
@@ -778,6 +818,7 @@ function profileDescription(profile) {
     return `${levelSettings[profile.level].label} · ${profile.days} available days/week · ${profile.time} min/session · Favorites: ${modalityText} · Focus: ${focusText}`;
 }
 
+// Explain how the second week changes based on previous feedback or an imported plan.
 function progressionText(profile, weeks) {
     if (profile.response === "too-hard") {
         return "The plan reduces the starting aerobic target and keeps faster work controlled. Leave extra rest if recovery still feels poor.";
@@ -797,6 +838,7 @@ function progressionText(profile, weeks) {
     return "Week 2 rotates the quality session. Keep total effort controlled; without a previous completed-plan record, the planner does not assume you are ready for a volume jump.";
 }
 
+// Display the plan's aerobic minutes, strength days, and strength targets.
 function renderMetrics(profile, weeks) {
     const week1 = weeks[0];
     const week2 = weeks[1];
@@ -812,6 +854,7 @@ function renderMetrics(profile, weeks) {
     ].join("");
 }
 
+// Fill the shared tooltip with the selected exercise's description and place it on screen.
 function showExerciseTooltip(item) {
     exerciseTooltip.innerHTML = `
         <strong class="tooltip-title">${escapeHTML(item.dataset.exerciseName)}</strong>
@@ -834,10 +877,13 @@ function showExerciseTooltip(item) {
     exerciseTooltip.style.top = `${top}px`;
 }
 
+// Hide the shared exercise popup when the pointer or keyboard focus moves away.
 function hideExerciseTooltip() {
     exerciseTooltip.hidden = true;
 }
 
+// Event listeners are instructions that run when a user action happens, such as pointing or focusing.
+// These listeners support mouse, touch-pointer, and keyboard access to the exercise details.
 weeksElement.addEventListener("pointerover", (event) => {
     const item = event.target.closest(".exercise-item");
     if (item && (!event.relatedTarget || !item.contains(event.relatedTarget))) showExerciseTooltip(item);
@@ -861,6 +907,7 @@ weeksElement.addEventListener("focusout", (event) => {
 window.addEventListener("scroll", hideExerciseTooltip, true);
 window.addEventListener("resize", hideExerciseTooltip);
 
+// Put a compact text record in the printout so a future PDF import can recognize this planner's output.
 function updatePrintRecord(profile, weeks) {
     const favorites = profile.favorites.join(",") || "none";
     const joints = profile.joints.join(",") || "none";
@@ -868,6 +915,7 @@ function updatePrintRecord(profile, weeks) {
     document.getElementById("print-record").textContent = `PLAN RECORD FOR FUTURE IMPORT: ${record}`;
 }
 
+// Run the planning steps, update the page, and save the chosen settings for the next visit.
 function generatePlan({ scroll = true } = {}) {
     const profile = normalizeProfile();
     const weeks = [buildWeek(profile, 0), buildWeek(profile, 1)];
@@ -883,6 +931,9 @@ function generatePlan({ scroll = true } = {}) {
     if (scroll) output.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+// Save only the form choices in this browser's local storage; the uploaded PDF is excluded.
+// Local storage is a small browser-managed area that keeps text data between visits on this device.
+// JSON (JavaScript Object Notation) turns the settings into text so the browser can store them together.
 function savePlannerState(hasGeneratedPlan = false) {
     try {
         const allowedFavorites = [...document.querySelectorAll('input[name="favorites"]')];
@@ -906,6 +957,7 @@ function savePlannerState(hasGeneratedPlan = false) {
     }
 }
 
+// Check that storage can be written, restore saved choices, and rebuild a previous plan if needed.
 function restorePlannerState() {
     try {
         const probeKey = `${PLANNER_STORAGE_KEY}-availability-check`;
@@ -941,12 +993,15 @@ function restorePlannerState() {
     }
 }
 
+// Show a readable status message after a PDF is selected or processed.
 function setPdfStatus(message, state = "") {
     pdfStatus.textContent = message;
     if (state) pdfStatus.dataset.state = state;
     else delete pdfStatus.dataset.state;
 }
 
+// A regular expression (regex) is a text pattern; this one finds the planner's compact record in PDF text.
+// Only recognized values are accepted, so arbitrary PDF text is not treated as a setting.
 function parsePlannerRecord(text) {
     const match = text.match(/AERO_PLAN_RECORD_V1\s+level=(beginner|intermediate|advanced)\s+days=(3|4|5|6|7)\s+time=(20|30|45|60|90)\s+aerobic=(\d+)\s+preferred=([a-z,]*)\s+focus=([a-z,]*)/i);
     if (!match) return null;
@@ -964,6 +1019,7 @@ function parsePlannerRecord(text) {
     };
 }
 
+// For other workout PDFs, look for common activity words without displaying their raw text.
 function parseOtherPdf(text) {
     const modePatterns = {
         run: /\b(run|running|jog|jogging)\b/i,
@@ -987,6 +1043,7 @@ function parseOtherPdf(text) {
     };
 }
 
+// Check the activity and support-area boxes identified in an imported PDF.
 function applyImportedChoices(context) {
     const values = new Set([...(context.favorites || []), ...(context.modalities || []), ...(context.focus || [])]);
     for (const value of values) {
@@ -997,6 +1054,8 @@ function applyImportedChoices(context) {
     }
 }
 
+// Read a selected PDF locally, with limits on file size, pages, extracted text, and time.
+// async means this function can wait for file and PDF operations without freezing the page.
 async function readPreviousPdf(file) {
     previousPlanContext = null;
     if (!file) {
@@ -1081,10 +1140,12 @@ async function readPreviousPdf(file) {
     }
 }
 
+// Connect the file picker, form submit button, and PDF export button to their actions.
 pdfInput.addEventListener("change", (event) => {
     readPreviousPdf(event.target.files?.[0]);
 });
 
+// When the user submits the form, prevent a full page reload and build the two-week plan.
 form.addEventListener("submit", (event) => {
     event.preventDefault();
     appStatus.textContent = "Building your two-week plan…";
@@ -1097,13 +1158,16 @@ form.addEventListener("submit", (event) => {
     }
 });
 
+// Save updated choices as the user changes them; changing a choice marks the old plan as out of date.
 form.addEventListener("input", () => savePlannerState(false));
 form.addEventListener("change", () => savePlannerState(false));
 
+// The browser's print dialog can save the visible plan as a PDF file.
 document.getElementById("export-pdf").addEventListener("click", () => {
     if (!latestPlan) return;
     window.print();
 });
 
+// Start the page, then restore this browser's saved choices if storage is available.
 appStatus.textContent = "Planner ready. Choose your options and generate a plan.";
 restorePlannerState();

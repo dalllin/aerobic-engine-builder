@@ -1,3 +1,4 @@
+/* Shared colors used throughout the page. CSS variables let one color be reused consistently. */
 :root {
     color-scheme: light;
     --ink: #18312e;
@@ -15,6 +16,7 @@
     box-sizing: border-box;
 }
 
+/* Base page typography, spacing, and background. */
 body {
     margin: 0;
     background:
@@ -31,12 +33,14 @@ input {
     font: inherit;
 }
 
+/* Centers the page and limits its width on large screens. */
 .container {
     width: min(1500px, calc(100% - 48px));
     margin: 0 auto;
     padding: 30px 0;
 }
 
+/* The large introductory banner at the top of the page. */
 .hero {
     position: relative;
     overflow: hidden;
@@ -108,6 +112,7 @@ h1 {
     text-underline-offset: 4px;
 }
 
+/* White panels hold the input form and the generated plan. */
 .planner,
 .plan-output {
     margin-top: 22px;
@@ -119,6 +124,7 @@ h1 {
 }
 
 .section-heading h2,
+/* Small text and form layout helpers. */
 .info-card h2 {
     margin-bottom: 8px;
     font-size: clamp(1.45rem, 3vw, 2rem);
@@ -131,6 +137,7 @@ h1 {
     color: var(--muted);
 }
 
+/* Lines up the select menus in a flexible grid. */
 .form-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -139,6 +146,7 @@ h1 {
 }
 
 .field label,
+/* Form groups, labels, and selectable preference tiles. */
 .choice-group legend {
     display: block;
     margin-bottom: 7px;
@@ -227,6 +235,7 @@ summary:focus-visible {
     font-weight: 650;
 }
 
+/* File-upload controls and messages shown while reading a previous plan. */
 .upload-row {
     display: flex;
     flex-wrap: wrap;
@@ -298,6 +307,7 @@ summary:focus-visible {
     font-weight: 700;
 }
 
+/* Submit button area and its status messages, including local-storage feedback. */
 .form-actions {
     display: flex;
     flex-wrap: wrap;
@@ -310,6 +320,7 @@ summary:focus-visible {
     margin: 0;
 }
 
+/* Shared button appearance and hover feedback. */
 button {
     min-height: 49px;
     padding: 11px 19px;
@@ -344,6 +355,7 @@ button:hover {
     background: #f2f7ed;
 }
 
+/* Heading, target summaries, and progression notes above the calendar. */
 .output-heading {
     display: flex;
     gap: 20px;
@@ -410,6 +422,7 @@ button:hover {
     font-size: 0.91rem;
 }
 
+/* Each week contains a horizontally scrollable row of seven day cards. */
 .week-section {
     margin: 30px 0;
 }
@@ -455,6 +468,7 @@ button:hover {
     background: #a8b9a7;
 }
 
+/* Seven equal columns create the week row; scrolling keeps the cards readable on phones. */
 .day-grid {
     display: grid;
     min-width: 1260px;
@@ -462,6 +476,7 @@ button:hover {
     gap: 11px;
 }
 
+/* Workout cards use color accents to distinguish different session types. */
 .day-card {
     min-height: 250px;
     padding: 14px;
@@ -568,6 +583,7 @@ button:hover {
     font-weight: 800;
 }
 
+/* Separates multiple activities that belong to the same day. */
 .session-block + .session-block {
     margin-top: 12px;
     padding-top: 11px;
@@ -589,6 +605,7 @@ button:hover {
     font-weight: 700;
 }
 
+/* Exercise names, prescriptions, and the small info buttons in each workout. */
 .exercise-list {
     margin: 3px 0 0;
     padding: 0;
@@ -641,6 +658,7 @@ button:hover {
     background: var(--leaf);
 }
 
+/* Floating exercise instructions positioned by JavaScript near the focused exercise. */
 .exercise-tooltip {
     position: fixed;
     z-index: 10000;
@@ -671,6 +689,7 @@ button:hover {
     margin-bottom: 0;
 }
 
+/* Expandable training explanations and the text shown in print-to-PDF mode. */
 .guidelines {
     margin-top: 26px;
     padding: 17px 19px;
@@ -704,6 +723,7 @@ button:hover {
     display: none;
 }
 
+/* Supporting information, safety notes, and source links near the page bottom. */
 .info-card {
     margin-top: 38px;
     padding: clamp(20px, 4vw, 30px);
@@ -752,6 +772,7 @@ button:hover {
     display: none !important;
 }
 
+/* A media query applies these layout adjustments on tablets and narrow screens. */
 @media (max-width: 760px) {
     .container {
         width: min(100% - 28px, 620px);
@@ -785,6 +806,7 @@ button:hover {
     }
 }
 
+/* Extra adjustments for very small phone screens. */
 @media (max-width: 420px) {
     .choice-grid {
         grid-template-columns: 1fr;
@@ -795,6 +817,7 @@ button:hover {
     }
 }
 
+/* Print rules make the browser's Save as PDF output fit landscape pages. */
 @page {
     size: landscape;
     margin: 0.45in;

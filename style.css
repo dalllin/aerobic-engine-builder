@@ -275,6 +275,12 @@ summary:focus-visible {
     font-size: 0.86rem;
 }
 
+.storage-note {
+    margin: 8px 0 0;
+    color: var(--muted);
+    font-size: 0.82rem;
+}
+
 .status[data-state="error"] {
     color: #9a3c31;
     font-weight: 700;
